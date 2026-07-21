@@ -1,0 +1,3 @@
+import type { Metadata } from "next";import { PageHero } from "@/components/page-hero";import { ProjectGrid } from "@/components/project-grid";
+export const metadata:Metadata={title:"Portfolio",description:"Explore selected POS, CCTV, web, biometric and networking projects delivered by Sysnettech Solutions."};
+export default function Portfolio(){return <><PageHero eyebrow="Our work" title="Solutions working in the real world." description="Explore how we help organisations improve visibility, efficiency, security and customer experience."/><section className="py-20"><div className="container-site"><ProjectGrid/></div></section></>}

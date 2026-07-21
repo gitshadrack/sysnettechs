@@ -1,0 +1,6 @@
+<?php
+use App\Http\Controllers\AuthController;use App\Http\Controllers\ContentController;use App\Http\Controllers\EnquiryController;use App\Http\Controllers\AdminController;use Illuminate\Support\Facades\Route;
+Route::get('/content/{type}',[ContentController::class,'index'])->whereIn('type',['services','projects','products','posts','testimonials','team','careers','faqs','settings']);
+Route::post('/contact',[EnquiryController::class,'store']);Route::post('/quotes',[EnquiryController::class,'store']);Route::post('/service-requests',[EnquiryController::class,'store']);Route::post('/applications',[EnquiryController::class,'store']);
+Route::post('/auth/login',[AuthController::class,'login']);
+Route::middleware('auth:sanctum')->prefix('admin')->group(function(){Route::post('/logout',[AuthController::class,'logout']);Route::get('/analytics',[AdminController::class,'analytics']);Route::get('/enquiries',[AdminController::class,'enquiries']);Route::patch('/enquiries/{enquiry}',[AdminController::class,'updateEnquiry']);Route::apiResource('/content',ContentController::class)->except('index');Route::post('/uploads',[AdminController::class,'upload']);Route::get('/users',[AdminController::class,'users']);Route::post('/users',[AdminController::class,'storeUser']);Route::post('/backups',[AdminController::class,'backup']);});

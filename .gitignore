@@ -1,0 +1,10 @@
+.env
+frontend/.next/
+frontend/node_modules/
+backend/vendor/
+backend/storage/app/private/
+backend/storage/app/public/
+backend/storage/logs/*.log
+backend/bootstrap/cache/*.php
+!.gitkeep
+*.local
