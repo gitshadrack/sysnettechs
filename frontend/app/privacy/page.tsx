@@ -1,1 +1,28 @@
-import { PageHero } from "@/components/page-hero";export default function Privacy(){return <><PageHero eyebrow="Legal" title="Privacy policy" description="How Sysnettech Solutions handles information shared through this website."/><article className="container-site max-w-3xl py-16 leading-8"><h2 className="text-xl font-bold">Information we collect</h2><p className="mt-3">We collect information you submit through contact, quote, service and career forms to respond to your request and provide relevant services.</p><h2 className="mt-8 text-xl font-bold">How we use it</h2><p className="mt-3">We use personal data only for legitimate service delivery, communication, security and legal purposes. We do not sell personal information.</p><h2 className="mt-8 text-xl font-bold">Your choices</h2><p className="mt-3">You may request access, correction or deletion by emailing info@sysnettechs.co.ke.</p></article></>}
+import { PageHero } from "@/components/page-hero";
+export default function Privacy() {
+  return (
+    <>
+      <PageHero
+        eyebrow="Legal"
+        title="Privacy policy"
+        description="How Sysnettech Solutions handles information shared through this website."
+      />
+      <article className="container-site max-w-3xl py-16 leading-8">
+        <h2 className="text-xl font-bold">Information we collect</h2>
+        <p className="mt-3">
+          We collect information you submit through contact, quote, service and career forms to respond to
+          your request and provide relevant services.
+        </p>
+        <h2 className="mt-8 text-xl font-bold">How we use it</h2>
+        <p className="mt-3">
+          We use personal data only for legitimate service delivery, communication, security and legal
+          purposes. We do not sell personal information.
+        </p>
+        <h2 className="mt-8 text-xl font-bold">Your choices</h2>
+        <p className="mt-3">
+          You may request access, correction or deletion by emailing info@sysnettechs.co.ke.
+        </p>
+      </article>
+    </>
+  );
+}

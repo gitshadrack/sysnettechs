@@ -1,3 +1,97 @@
-import type { Metadata } from "next";import { Briefcase,GraduationCap,Heart,MapPin } from "lucide-react";import { PageHero } from "@/components/page-hero";import { LeadForm } from "@/components/forms";
-export const metadata:Metadata={title:"Careers",description:"Explore jobs and internships at Sysnettech Solutions Ltd and help build better business technology in Kenya."};
-export default function Careers(){return <><PageHero eyebrow="Careers" title="Do meaningful work with technology." description="Join a collaborative Kenyan team solving real operational challenges for growing organisations."/><section className="py-20"><div className="container-site"><div className="grid gap-5 md:grid-cols-3">{[[Heart,"Work that matters","Deliver systems that help local businesses operate, protect and grow."],[GraduationCap,"Keep learning","Build depth across modern platforms, products and industries."],[Briefcase,"Own the outcome","Take responsibility, share ideas and see your work in production."]].map(([Icon,t,c])=>{const I=Icon as typeof Heart;return <div className="card" key={t as string}><I className="text-brand-teal"/><h2 className="mt-6 text-xl font-bold text-slate-950 dark:text-white">{t as string}</h2><p className="mt-3 leading-7">{c as string}</p></div>})}</div><div className="mt-20"><p className="eyebrow">Open roles</p><h2 className="heading">Current opportunities</h2><div className="mt-10 space-y-4">{[["ICT Support Engineer","Full-time","Nairobi"],["Business Development Executive","Full-time","Nairobi"],["Software Developer Intern","Internship","Hybrid"]].map(([r,t,l])=><div key={r} className="flex flex-col gap-4 rounded-2xl border border-slate-200 p-6 sm:flex-row sm:items-center dark:border-slate-800"><div className="flex-1"><h3 className="font-display text-lg font-bold text-slate-950 dark:text-white">{r}</h3><p className="mt-2 flex gap-4 text-sm"><span>{t}</span><span className="flex gap-1"><MapPin size={15}/>{l}</span></p></div><a href="#apply" className="btn-primary">Apply now</a></div>)}</div></div></div></section><section id="apply" className="scroll-mt-24 bg-slate-50 py-20 dark:bg-slate-900/50"><div className="container-site grid gap-12 lg:grid-cols-2"><div><p className="eyebrow">Apply online</p><h2 className="heading">Bring your skills and curiosity.</h2><p className="mt-5 text-lg leading-8">Upload your CV and tell us where you can make a difference. If there is a fit, our team will be in touch.</p></div><div className="card"><LeadForm kind="applications"/></div></div></section></>}
+import type { Metadata } from "next";
+import { Briefcase, GraduationCap, Heart, MapPin } from "lucide-react";
+import { PageHero } from "@/components/page-hero";
+import { LeadForm } from "@/components/forms";
+export const metadata: Metadata = {
+  title: "Careers",
+  description:
+    "Explore jobs and internships at Sysnettech Solutions Ltd and help build better business technology in Kenya.",
+};
+export default function Careers() {
+  return (
+    <>
+      <PageHero
+        eyebrow="Careers"
+        title="Do meaningful work with technology."
+        description="Join a collaborative Kenyan team solving real operational challenges for growing organisations."
+      />
+      <section className="py-20">
+        <div className="container-site">
+          <div className="grid gap-5 md:grid-cols-3">
+            {[
+              [
+                Heart,
+                "Work that matters",
+                "Deliver systems that help local businesses operate, protect and grow.",
+              ],
+              [
+                GraduationCap,
+                "Keep learning",
+                "Build depth across modern platforms, products and industries.",
+              ],
+              [
+                Briefcase,
+                "Own the outcome",
+                "Take responsibility, share ideas and see your work in production.",
+              ],
+            ].map(([Icon, t, c]) => {
+              const I = Icon as typeof Heart;
+              return (
+                <div className="card" key={t as string}>
+                  <I className="text-brand-teal" />
+                  <h2 className="mt-6 text-xl font-bold text-slate-950 dark:text-white">{t as string}</h2>
+                  <p className="mt-3 leading-7">{c as string}</p>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-20">
+            <p className="eyebrow">Open roles</p>
+            <h2 className="heading">Current opportunities</h2>
+            <div className="mt-10 space-y-4">
+              {[
+                ["ICT Support Engineer", "Full-time", "Nairobi"],
+                ["Business Development Executive", "Full-time", "Nairobi"],
+                ["Software Developer Intern", "Internship", "Hybrid"],
+              ].map(([r, t, l]) => (
+                <div
+                  key={r}
+                  className="flex flex-col gap-4 rounded-2xl border border-slate-200 p-6 sm:flex-row sm:items-center dark:border-slate-800"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-display text-lg font-bold text-slate-950 dark:text-white">{r}</h3>
+                    <p className="mt-2 flex gap-4 text-sm">
+                      <span>{t}</span>
+                      <span className="flex gap-1">
+                        <MapPin size={15} />
+                        {l}
+                      </span>
+                    </p>
+                  </div>
+                  <a href="#apply" className="btn-primary">
+                    Apply now
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="apply" className="scroll-mt-24 bg-slate-50 py-20 dark:bg-slate-900/50">
+        <div className="container-site grid gap-12 lg:grid-cols-2">
+          <div>
+            <p className="eyebrow">Apply online</p>
+            <h2 className="heading">Bring your skills and curiosity.</h2>
+            <p className="mt-5 text-lg leading-8">
+              Upload your CV and tell us where you can make a difference. If there is a fit, our team will be
+              in touch.
+            </p>
+          </div>
+          <div className="card">
+            <LeadForm kind="applications" />
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

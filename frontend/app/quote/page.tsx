@@ -1,3 +1,53 @@
-import type { Metadata } from "next";import { CheckCircle2 } from "lucide-react";import { PageHero } from "@/components/page-hero";import { LeadForm } from "@/components/forms";
-export const metadata:Metadata={title:"Request a Free Quote",description:"Request a tailored ICT solution quote from Sysnettech Solutions Ltd."};
-export default function Quote(){return <><PageHero eyebrow="Free consultation" title="Tell us what success looks like." description="Share your requirements and receive practical recommendations with a clear, no-obligation estimate."/><section className="py-20"><div className="container-site grid gap-12 lg:grid-cols-[.7fr_1.3fr]"><div><h2 className="heading text-3xl">What happens next?</h2><div className="mt-8 space-y-6">{["A solutions specialist reviews your brief.","We contact you within one business day.","Where needed, we arrange a site assessment.","You receive a clear scope, timeline and estimate."].map((x,i)=><div key={x} className="flex gap-4"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-navy text-sm font-bold text-white">{i+1}</span><p className="pt-1">{x}</p></div>)}</div><div className="mt-10 rounded-2xl bg-teal-50 p-6 dark:bg-teal-950/30"><p className="flex gap-2 font-bold text-slate-950 dark:text-white"><CheckCircle2 className="text-brand-teal"/>No obligation. No hard sell.</p><p className="mt-2 text-sm leading-6">Just useful advice from a team that understands business technology.</p></div></div><div className="card"><LeadForm kind="quotes"/></div></div></section></>}
+import type { Metadata } from "next";
+import { CheckCircle2 } from "lucide-react";
+import { PageHero } from "@/components/page-hero";
+import { LeadForm } from "@/components/forms";
+export const metadata: Metadata = {
+  title: "Request a Free Quote",
+  description: "Request a tailored ICT solution quote from Sysnettech Solutions Ltd.",
+};
+export default function Quote() {
+  return (
+    <>
+      <PageHero
+        eyebrow="Free consultation"
+        title="Tell us what success looks like."
+        description="Share your requirements and receive practical recommendations with a clear, no-obligation estimate."
+      />
+      <section className="py-20">
+        <div className="container-site grid gap-12 lg:grid-cols-[.7fr_1.3fr]">
+          <div>
+            <h2 className="heading text-3xl">What happens next?</h2>
+            <div className="mt-8 space-y-6">
+              {[
+                "A solutions specialist reviews your brief.",
+                "We contact you within one business day.",
+                "Where needed, we arrange a site assessment.",
+                "You receive a clear scope, timeline and estimate.",
+              ].map((x, i) => (
+                <div key={x} className="flex gap-4">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-navy text-sm font-bold text-white">
+                    {i + 1}
+                  </span>
+                  <p className="pt-1">{x}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-10 rounded-2xl bg-teal-50 p-6 dark:bg-teal-950/30">
+              <p className="flex gap-2 font-bold text-slate-950 dark:text-white">
+                <CheckCircle2 className="text-brand-teal" />
+                No obligation. No hard sell.
+              </p>
+              <p className="mt-2 text-sm leading-6">
+                Just useful advice from a team that understands business technology.
+              </p>
+            </div>
+          </div>
+          <div className="card">
+            <LeadForm kind="quotes" />
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
