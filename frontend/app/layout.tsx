@@ -8,26 +8,30 @@ import { CookieConsent } from "@/components/cookie-consent";
 import { Analytics } from "@/components/analytics";
 import { JsonLd } from "@/components/json-ld";
 import { createPageMetadata, siteUrl } from "@/lib/seo";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-plus-jakarta", display: "swap" });
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  ...createPageMetadata({
-    title: "Sysnettech Solutions Ltd | ICT Solutions Kenya",
-    description:
-      "Leading ICT solutions provider in Kenya for POS systems, CCTV, web development, biometric systems and secure computer networks.",
-    path: "/",
-  }),
-  title: { default: "Sysnettech Solutions Ltd | ICT Solutions Kenya", template: "%s | Sysnettech Solutions" },
-  keywords: [
-    "ICT company Kenya",
-    "POS systems Kenya",
-    "CCTV installation Nairobi",
-    "web development Kenya",
-    "biometric systems Kenya",
-    "networking company Nairobi",
-  ],
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings();
+  const page = createPageMetadata({ title: settings.site_title, description: settings.meta_description, path: "/" });
+  return {
+    metadataBase: new URL(siteUrl),
+    ...page,
+    title: { default: settings.site_title, template: "%s | Sysnettech Solutions" },
+    openGraph: {
+      ...page.openGraph,
+      images: [{ url: settings.og_image, alt: "Sysnettech Solutions ICT services in Kenya" }],
+    },
+    keywords: [
+      "ICT company Kenya",
+      "POS systems Kenya",
+      "CCTV installation Nairobi",
+      "web development Kenya",
+      "biometric systems Kenya",
+      "networking company Nairobi",
+    ],
+  };
+}
 const schema = [
   {
     "@context": "https://schema.org",

@@ -15,7 +15,7 @@ export function Stat({ value, suffix, label }: { value: number; suffix: string; 
         <motion.span>{rounded}</motion.span>
         {suffix}
       </div>
-      <p className="mt-2 text-sm text-white/60">{label}</p>
+      <p className="mt-2 text-sm text-white/80">{label}</p>
     </div>
   );
 }

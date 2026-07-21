@@ -177,21 +177,42 @@ export const products = [
 
 export const posts = [
   {
+    slug: "choose-the-right-pos-system",
     title: "How to Choose the Right POS System for Your Business",
     category: "Business Technology",
     date: "15 Jul 2026",
+    publishedAt: "2026-07-15",
     excerpt: "A practical guide to features, integrations and support considerations for Kenyan retailers.",
+    content: [
+      "A point-of-sale platform should support the way your business actually operates. Begin with daily workflows: checkout speed, stock receiving, returns, reporting, user permissions and branch management.",
+      "For Kenyan businesses, payment integration and dependable local support matter as much as feature lists. Confirm how the system handles M-Pesa reconciliation, offline trading, tax configuration and backups before committing.",
+      "Choose a platform that can grow without forcing a complete replacement. Ask for a structured demonstration using your real scenarios, a documented implementation plan and clear post-installation support terms.",
+    ],
   },
   {
+    slug: "strengthen-office-network-security",
     title: "7 Ways to Strengthen Your Office Network Security",
     category: "Cybersecurity",
     date: "02 Jul 2026",
+    publishedAt: "2026-07-02",
     excerpt: "Simple, high-impact controls that protect your team, devices and customer data.",
+    content: [
+      "Strong network security starts with accurate visibility. Maintain an inventory of routers, switches, access points, servers and connected devices, then remove or isolate anything no longer required.",
+      "Use unique administrator credentials, multi-factor authentication where supported, current firmware and separate networks for staff, guests and operational devices.",
+      "Backups, monitoring and an incident response contact are equally important. Security is an operating discipline, so schedule regular reviews and test recovery procedures.",
+    ],
   },
   {
+    slug: "ip-vs-analog-cctv",
     title: "IP vs Analog CCTV: What Should You Install?",
     category: "Surveillance",
     date: "19 Jun 2026",
+    publishedAt: "2026-06-19",
     excerpt: "Compare image quality, scalability and total ownership cost before investing.",
+    content: [
+      "Modern analog systems can be cost-effective for straightforward upgrades that reuse existing coaxial cabling. IP cameras provide greater resolution, flexible network deployment and stronger support for analytics.",
+      "The correct choice depends on coverage, retention, lighting, bandwidth, remote access and future expansion. Camera resolution alone does not determine evidential quality.",
+      "Request a site survey and a retention calculation before procurement. A professional design should document camera purpose, recording duration, user access and maintenance responsibilities.",
+    ],
   },
 ];

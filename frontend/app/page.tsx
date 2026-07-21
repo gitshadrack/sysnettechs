@@ -274,14 +274,14 @@ export default function Home() {
             <h2 className="font-display text-3xl font-bold sm:text-4xl">
               Useful ICT guidance, sent occasionally.
             </h2>
-            <p className="mt-4 text-white/60">
+            <p className="mt-4 text-white/80">
               No noise—just practical insights, security tips and product updates.
             </p>
             <Newsletter />
           </div>
           <div className="lg:text-right">
             <h3 className="font-display text-3xl font-bold">Ready to build what’s next?</h3>
-            <p className="mt-3 text-white/60">Tell us what you need. We’ll respond with clear next steps.</p>
+            <p className="mt-3 text-white/80">Tell us what you need. We’ll respond with clear next steps.</p>
             <Link href="/quote" className="btn-primary mt-6">
               Request your free quote <ArrowRight size={17} />
             </Link>

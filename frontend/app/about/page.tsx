@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Eye, Flag, Handshake, Lightbulb, ShieldCheck, Users } from "lucide-react";
+import { Download, Eye, Flag, Handshake, Lightbulb, ShieldCheck, Users } from "lucide-react";
 import { PageHero } from "@/components/page-hero";
 import { SectionHeading } from "@/components/section-heading";
 import { Reveal } from "@/components/reveal";
@@ -104,33 +103,21 @@ export default function About() {
           </div>
         </div>
       </section>
-      <section className="bg-brand-ink py-20 text-white">
-        <div className="container-site">
-          <SectionHeading
-            eyebrow="Our people"
-            title="A multidisciplinary team on your side."
-            copy="Our project managers, engineers, developers and support specialists bring complementary expertise and a shared commitment to client success."
-          />
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {["Managing Director", "Technical Director", "Solutions Architect", "Customer Success Lead"].map(
-              (r, i) => (
-                <div key={r} className="overflow-hidden rounded-3xl bg-white/5">
-                  <div className="grid aspect-square place-items-center bg-gradient-to-br from-brand-navy to-brand-teal">
-                    <Users size={58} className="text-white/40" />
-                  </div>
-                  <div className="p-5">
-                    <b>Leadership Team</b>
-                    <small className="block text-white/50">{r}</small>
-                  </div>
-                </div>
-              ),
-            )}
-          </div>
-          <div className="mt-12 text-center">
-            <Link href="/careers" className="btn-secondary">
-              Join our team
-            </Link>
-          </div>
+      <section aria-labelledby="company-profile-title" className="bg-brand-ink py-20 text-white">
+        <div className="container-site flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+          <header className="max-w-3xl">
+            <p className="eyebrow text-teal-300">Company profile</p>
+            <h2 id="company-profile-title" className="font-display text-3xl font-bold sm:text-4xl">
+              Get a concise overview of our capabilities.
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-slate-300">
+              Download our company profile for an overview of Sysnettech Solutions, our services, and how we
+              support organisations across Kenya.
+            </p>
+          </header>
+          <a href="/company-profile.pdf" download className="btn-secondary shrink-0">
+            <Download aria-hidden="true" size={18} /> Download Company Profile
+          </a>
         </div>
       </section>
     </>

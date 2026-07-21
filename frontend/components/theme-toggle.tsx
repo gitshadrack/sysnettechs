@@ -16,6 +16,7 @@ export function ThemeToggle() {
   };
   return (
     <button
+      type="button"
       onClick={toggle}
       className="grid h-10 w-10 place-items-center rounded-full border border-slate-200 text-slate-600 hover:border-brand-teal hover:text-brand-teal dark:border-slate-700 dark:text-white"
       aria-label={dark ? "Use light mode" : "Use dark mode"}
