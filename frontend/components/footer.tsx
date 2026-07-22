@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone } from "lucide-react";
-import { company, services } from "@/lib/data";
+import { company, featuredServices } from "@/lib/data";
 import { getPublicSiteSettings } from "@/lib/site-settings";
 import { Logo } from "./logo";
 export async function Footer() {
@@ -35,7 +35,7 @@ export async function Footer() {
         </section>
         <nav aria-label="Solutions">
           <h2 className="mb-5 font-display font-bold text-white">Solutions</h2>
-          {services.map((s) => (
+          {featuredServices.map((s) => (
             <Link
               className="mb-3 block text-sm hover:text-teal-300"
               href={`/services#${s.slug}`}
@@ -44,6 +44,9 @@ export async function Footer() {
               {s.title}
             </Link>
           ))}
+          <Link className="mt-5 block text-sm font-bold text-teal-300 hover:text-white" href="/services">
+            View all solutions →
+          </Link>
         </nav>
         <nav aria-label="Company">
           <h2 className="mb-5 font-display font-bold text-white">Company</h2>

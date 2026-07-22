@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import { submitForm } from "@/lib/api";
+import { services } from "@/lib/data";
 
 type Kind = "contact" | "quotes" | "service-requests" | "applications";
 export function LeadForm({ kind = "contact", compact = false }: { kind?: Kind; compact?: boolean }) {
@@ -79,11 +80,11 @@ export function LeadForm({ kind = "contact", compact = false }: { kind?: Kind; c
             className="w-full rounded-xl border border-slate-300 bg-transparent px-4 py-3 outline-none focus:border-brand-teal-aa focus:ring-2 focus:ring-brand-teal-aa/30 dark:border-slate-600"
           >
             <option value="">Select a service</option>
-            <option>POS Systems</option>
-            <option>CCTV & Surveillance</option>
-            <option>Web Development</option>
-            <option>Biometric Systems</option>
-            <option>Computer Networking</option>
+            {services.map((service) => (
+              <option key={service.slug} value={service.title}>
+                {service.title}
+              </option>
+            ))}
           </select>
         </label>
       )}

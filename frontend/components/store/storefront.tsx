@@ -15,7 +15,6 @@ import {
   Router,
   ScanBarcode,
   ShoppingCart,
-  Smartphone,
   Trash2,
 } from "lucide-react";
 
@@ -389,9 +388,18 @@ export function Storefront() {
                 <fieldset className="sm:col-span-2">
                   <legend className="admin-label">Payment method</legend>
                   <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                    <Payment value="mpesa" label="M-Pesa" icon={Smartphone} />
-                    <Payment value="card" label="Visa / Mastercard" icon={CreditCard} />
-                    <Payment value="bank_transfer" label="Bank transfer" icon={Network} defaultChecked />
+                    <Payment value="mpesa" label="M-Pesa" image="/images/payments/mpesa.svg" />
+                    <Payment
+                      value="card"
+                      label="Visa / Mastercard"
+                      image="/images/payments/visa-mastercard.svg"
+                    />
+                    <Payment
+                      value="bank_transfer"
+                      label="Bank transfer"
+                      image="/images/payments/bank-transfer.svg"
+                      defaultChecked
+                    />
                   </div>
                   <p className="mt-3 text-xs">
                     M-Pesa and cards continue through secure hosted checkout. No card or M-Pesa credentials
@@ -449,19 +457,29 @@ function Field({
 function Payment({
   value,
   label,
-  icon: Icon,
+  image,
   defaultChecked = false,
 }: {
   value: string;
   label: string;
-  icon: typeof CreditCard;
+  image: string;
   defaultChecked?: boolean;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-300 p-4 font-bold has-[:checked]:border-brand-teal-aa has-[:checked]:bg-teal-50 dark:border-slate-600 dark:has-[:checked]:bg-teal-950">
-      <input type="radio" name="payment_method" value={value} defaultChecked={defaultChecked} required />
-      <Icon aria-hidden="true" size={20} />
-      {label}
+    <label className="relative flex cursor-pointer flex-col gap-3 rounded-xl border border-slate-300 p-3 font-bold transition hover:border-brand-teal-aa has-[:checked]:border-brand-teal-aa has-[:checked]:bg-teal-50 has-[:checked]:ring-2 has-[:checked]:ring-brand-teal-aa/20 dark:border-slate-600 dark:has-[:checked]:bg-teal-950">
+      <span className="flex items-center gap-2">
+        <input type="radio" name="payment_method" value={value} defaultChecked={defaultChecked} required />
+        <span>{label}</span>
+      </span>
+      <span className="grid h-14 place-items-center overflow-hidden rounded-lg border border-slate-200 bg-white px-3 dark:border-slate-700">
+        <img
+          src={image}
+          alt={`${label} payment option`}
+          width={230}
+          height={64}
+          className="h-11 w-full object-contain"
+        />
+      </span>
     </label>
   );
 }

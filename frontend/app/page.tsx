@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   ShoppingBag,
 } from "lucide-react";
-import { services, posts } from "@/lib/data";
+import { additionalServiceGroups, featuredServices, posts } from "@/lib/data";
 import { Reveal } from "@/components/reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { Stat } from "@/components/stat";
@@ -108,7 +108,7 @@ export default function Home() {
             copy="Practical, secure and scalable technology aligned to your goals—not one-size-fits-all packages."
           />
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {services.map((s, i) => (
+            {featuredServices.map((s, i) => (
               <Reveal key={s.slug}>
                 <Link
                   id={s.slug}
@@ -135,6 +135,40 @@ export default function Home() {
                 </Link>
               </Reveal>
             ))}
+          </div>
+          <div className="mt-12 overflow-hidden rounded-3xl bg-brand-ink p-7 text-white sm:p-10">
+            <div className="grid gap-5 lg:grid-cols-[.7fr_1.3fr] lg:items-end">
+              <div>
+                <p className="eyebrow text-teal-300">More solutions</p>
+                <h3 className="mt-2 font-display text-3xl font-bold">A broader ICT partner as you grow.</h3>
+              </div>
+              <p className="max-w-2xl leading-7 text-slate-300 lg:justify-self-end">
+                Explore specialist platforms, cloud services, automation and ongoing IT support through one
+                accountable team.
+              </p>
+            </div>
+            <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {additionalServiceGroups.map((group) => (
+                <section key={group.id} className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                  <h4 className="font-display font-bold text-teal-300">{group.title}</h4>
+                  <div className="mt-4 space-y-2">
+                    {group.services.map((service) => (
+                      <Link
+                        key={service.slug}
+                        href={`/services#${service.slug}`}
+                        className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm text-slate-200 transition hover:bg-white/10 hover:text-white"
+                      >
+                        <span>{service.title}</span>
+                        <ChevronRight aria-hidden="true" size={15} className="shrink-0 text-brand-teal" />
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+            <Link href="/services" className="btn-secondary mt-8">
+              View all services <ArrowRight aria-hidden="true" size={17} />
+            </Link>
           </div>
         </div>
       </section>

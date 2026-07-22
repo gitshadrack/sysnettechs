@@ -1,7 +1,7 @@
 import { JsonLd } from "@/components/json-ld";
 import { createPageMetadata, pageSchema } from "@/lib/seo";
 const description =
-  "Professional POS, CCTV, web development, biometric and computer networking services in Nairobi and across Kenya.";
+  "Scalable business systems, security, infrastructure, cloud and managed technology services in Nairobi and across Kenya.";
 export const metadata = createPageMetadata({
   title: "ICT Services in Kenya",
   description,

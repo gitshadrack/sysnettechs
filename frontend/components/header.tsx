@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
 import { useState } from "react";
-import { services } from "@/lib/data";
+import { featuredServiceGroups } from "@/lib/data";
 import { Logo } from "./logo";
 import { ThemeToggle } from "./theme-toggle";
 const links = [
@@ -32,27 +32,49 @@ export function Header() {
                 </Link>
                 <section
                   aria-label="Services menu"
-                  className="invisible absolute left-1/2 top-10 w-[680px] -translate-x-1/2 rounded-3xl border border-slate-200 bg-white p-6 opacity-0 shadow-2xl transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 dark:border-slate-700 dark:bg-slate-900"
+                  className="invisible absolute left-1/2 top-10 w-[760px] -translate-x-1/2 rounded-3xl border border-slate-200 bg-white p-6 opacity-0 shadow-2xl transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 dark:border-slate-700 dark:bg-slate-900"
                 >
-                  <div className="grid grid-cols-2 gap-2">
-                    {services.map((s) => (
-                      <Link
-                        key={s.slug}
-                        href={`/services#${s.slug}`}
-                        className="flex gap-3 rounded-2xl p-4 hover:bg-slate-50 focus:bg-slate-50 dark:hover:bg-slate-800 dark:focus:bg-slate-800"
-                      >
-                        <s.icon
-                          aria-hidden="true"
-                          className="text-brand-teal-aa dark:text-teal-300"
-                          size={23}
-                        />
-                        <span>
-                          <b className="block text-sm text-slate-900 dark:text-white">{s.title}</b>
-                          <small className="text-slate-600 dark:text-slate-300">{s.summary}</small>
-                        </span>
-                      </Link>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+                    {featuredServiceGroups.map((category) => (
+                      <section key={category.id} aria-labelledby={`menu-${category.id}`}>
+                        <h2
+                          id={`menu-${category.id}`}
+                          className="px-3 text-xs font-bold uppercase tracking-[.14em] text-slate-500 dark:text-slate-400"
+                        >
+                          {category.title}
+                        </h2>
+                        <div className="mt-2 space-y-1">
+                          {category.services.map((service) => (
+                            <Link
+                              key={service.slug}
+                              href={`/services#${service.slug}`}
+                              className="flex gap-3 rounded-2xl p-3 hover:bg-slate-50 focus:bg-slate-50 dark:hover:bg-slate-800 dark:focus:bg-slate-800"
+                            >
+                              <service.icon
+                                aria-hidden="true"
+                                className="mt-0.5 shrink-0 text-brand-teal-aa dark:text-teal-300"
+                                size={21}
+                              />
+                              <span>
+                                <b className="block text-sm text-slate-900 dark:text-white">
+                                  {service.title}
+                                </b>
+                                <small className="line-clamp-1 text-slate-600 dark:text-slate-300">
+                                  {service.summary}
+                                </small>
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
+                      </section>
                     ))}
                   </div>
+                  <Link
+                    href="/services"
+                    className="mt-5 flex items-center justify-between rounded-2xl bg-brand-navy px-5 py-4 text-sm font-bold text-white"
+                  >
+                    Browse the complete solutions catalog <ArrowRight aria-hidden="true" size={17} />
+                  </Link>
                 </section>
               </div>
             ) : (
