@@ -49,6 +49,7 @@ const icons: Record<string, typeof Camera> = {
 };
 function productImageUrl(image: string) {
   if (/^https?:\/\//i.test(image)) return image;
+  if (image.startsWith("/images/products/")) return image;
   const apiOrigin = API_URL.replace(/\/api\/?$/, "");
   return `${apiOrigin}/${image.replace(/^\//, "")}`;
 }
@@ -274,8 +275,21 @@ export function Storefront() {
                   key={item.id}
                   className="border-b border-slate-200 pb-5 last:border-0 dark:border-slate-700"
                 >
-                  <div className="flex justify-between gap-4">
-                    <div>
+                  <div className="flex gap-4">
+                    <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700">
+                      {item.image ? (
+                        <img
+                          src={productImageUrl(item.image)}
+                          alt=""
+                          width={96}
+                          height={96}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <ShoppingCart aria-hidden="true" size={24} className="text-slate-400" />
+                      )}
+                    </span>
+                    <div className="min-w-0 flex-1">
                       <h3 className="font-bold text-slate-950 dark:text-white">{item.name}</h3>
                       <p className="text-sm">{money.format(Number(item.price))} each</p>
                     </div>
