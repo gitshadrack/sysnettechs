@@ -30,6 +30,7 @@ class AdminChatController extends Controller
     public function show(ChatConversation $conversation): JsonResponse
     {
         $conversation->update(['operator_last_read_at' => now()]);
+
         return response()->json([
             'conversation' => $conversation,
             'messages' => $conversation->messages()->get(),
@@ -54,6 +55,7 @@ class AdminChatController extends Controller
                 'last_message_at' => now(),
                 'operator_last_read_at' => now(),
             ]);
+
             return $message;
         });
 
@@ -64,6 +66,14 @@ class AdminChatController extends Controller
     {
         $data = $request->validate(['status' => ['required', 'in:open,pending,closed']]);
         $conversation->update($data);
+
         return response()->json(['conversation' => $conversation->fresh()]);
+    }
+
+    public function destroy(ChatConversation $conversation): JsonResponse
+    {
+        $conversation->delete();
+
+        return response()->json(null, 204);
     }
 }

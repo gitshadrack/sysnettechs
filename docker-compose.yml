@@ -1,14 +1,38 @@
 services:
   web:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
+        NEXT_PUBLIC_WHATSAPP_NUMBER: ${NEXT_PUBLIC_WHATSAPP_NUMBER:-254700000000}
+        NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
+      API_INTERNAL_URL: http://nginx/api
     ports: ["3000:3000"]
     depends_on: [nginx]
   api:
     build: ./backend
     restart: unless-stopped
+    env_file: ./backend/.env
+    volumes:
+      - uploads:/var/www/html/storage/app
+    depends_on:
+      mysql: { condition: service_healthy }
+  scheduler:
+    build: ./backend
+    restart: unless-stopped
+    command: php artisan schedule:work
+    env_file: ./backend/.env
+    volumes:
+      - uploads:/var/www/html/storage/app
+    depends_on:
+      mysql: { condition: service_healthy }
+  worker:
+    build: ./backend
+    restart: unless-stopped
+    command: php artisan queue:work --sleep=3 --tries=3 --backoff=30 --timeout=60 --max-time=3600
     env_file: ./backend/.env
     volumes:
       - uploads:/var/www/html/storage/app

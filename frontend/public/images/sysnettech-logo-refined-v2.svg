@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" role="img" aria-labelledby="title description">
+  <title id="title">Sysnettech Solutions Ltd</title>
+  <desc id="description">Sysnettech Solutions wordmark with a connected network S symbol.</desc>
+  <g transform="translate(18 2) scale(.5)">
+    <path d="M394 104H174c-70 0-112 48-112 108s42 86 112 86h72" fill="none" stroke="#0A2A66" stroke-width="64" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M266 298h72c70 0 112 32 112 82s-42 82-112 82H118" fill="none" stroke="#00A99D" stroke-width="64" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="256" cy="298" r="42" fill="#F7941D"/>
+    <circle cx="256" cy="298" r="17" fill="#FFFFFF"/>
+  </g>
+  <text x="290" y="126" fill="#0A2A66" font-family="Plus Jakarta Sans, Manrope, Arial, sans-serif" font-size="78" font-weight="700" letter-spacing="-2">Sysnettech</text>
+  <text x="294" y="188" fill="#00A99D" font-family="Plus Jakarta Sans, Manrope, Arial, sans-serif" font-size="37" font-weight="600" letter-spacing="7">SOLUTIONS LTD</text>
+</svg>

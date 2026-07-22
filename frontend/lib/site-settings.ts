@@ -20,7 +20,8 @@ export const defaultSiteSettings: PublicSiteSettings = {
 };
 
 export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
-  const apiUrl = process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
+  const apiUrl =
+    process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
   try {
     const response = await fetch(`${apiUrl}/settings/seo`, { next: { revalidate: 300 } });
     if (!response.ok) return defaultSiteSettings;

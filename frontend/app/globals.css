@@ -19,6 +19,70 @@ html {
 body {
   @apply bg-white text-slate-700 antialiased dark:bg-slate-950 dark:text-slate-300;
 }
+.a11y-text-large {
+  font-size: 112.5%;
+}
+.a11y-text-larger {
+  font-size: 125%;
+}
+.a11y-line-height :is(p, li, a, button, label, input, textarea, select) {
+  line-height: 1.85 !important;
+}
+.a11y-align-left main {
+  text-align: left !important;
+}
+.a11y-align-center main {
+  text-align: center !important;
+}
+.a11y-readable-font body,
+.a11y-readable-font body * {
+  font-family: Arial, Helvetica, sans-serif !important;
+  letter-spacing: 0.02em;
+}
+.a11y-grayscale body > :not(#accessibility-tools):not(script) {
+  filter: grayscale(1);
+}
+.a11y-high-contrast body {
+  background: #000 !important;
+  color: #fff !important;
+}
+.a11y-high-contrast :is(header, main, footer, section, article, aside, nav) {
+  border-color: #fff !important;
+}
+.a11y-high-contrast main :is(section, article) {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+.a11y-high-contrast main :is(h1, h2, h3, h4, p, li, dt, dd, label, span, strong) {
+  color: #fff !important;
+}
+.a11y-high-contrast a {
+  color: #ffdf33 !important;
+}
+.a11y-hide-images img {
+  visibility: hidden !important;
+}
+.a11y-pause-animations,
+.a11y-pause-animations * {
+  scroll-behavior: auto !important;
+}
+.a11y-pause-animations *,
+.a11y-pause-animations *::before,
+.a11y-pause-animations *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+.a11y-highlight-links a {
+  outline: 3px solid #f7941d !important;
+  outline-offset: 3px !important;
+  text-decoration: underline !important;
+}
+.a11y-focus-outline :focus-visible {
+  outline: 4px solid #f7941d !important;
+  outline-offset: 4px !important;
+  box-shadow: none !important;
+}
 ::selection {
   @apply bg-brand-teal text-white;
 }
@@ -49,6 +113,10 @@ body {
   .card {
     @apply rounded-3xl border border-slate-200/70 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-glow dark:border-slate-800 dark:bg-slate-900;
   }
-  .admin-input { @apply w-full rounded-xl border border-slate-300 bg-transparent px-4 py-3 text-sm outline-none focus:border-brand-teal-aa focus:ring-2 focus:ring-brand-teal-aa/30 dark:border-slate-600; }
-  .admin-label { @apply block text-sm font-bold text-slate-800 dark:text-slate-100; }
+  .admin-input {
+    @apply w-full rounded-xl border border-slate-300 bg-transparent px-4 py-3 text-sm outline-none focus:border-brand-teal-aa focus:ring-2 focus:ring-brand-teal-aa/30 dark:border-slate-600;
+  }
+  .admin-label {
+    @apply block text-sm font-bold text-slate-800 dark:text-slate-100;
+  }
 }

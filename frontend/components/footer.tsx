@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone } from "lucide-react";
 import { company, services } from "@/lib/data";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 import { Logo } from "./logo";
-export function Footer() {
+export async function Footer() {
+  const settings = await getPublicSiteSettings();
   const socials = [
-    [Facebook, "Facebook", "https://www.facebook.com/"],
-    [Instagram, "Instagram", "https://www.instagram.com/"],
-    [Linkedin, "LinkedIn", "https://www.linkedin.com/"],
-  ] as const;
+    { Icon: Facebook, label: "Facebook", url: settings.facebook_url },
+    { Icon: Instagram, label: "Instagram", url: settings.instagram_url },
+    { Icon: Linkedin, label: "LinkedIn", url: settings.linkedin_url },
+  ].filter(({ url }) => Boolean(url));
   return (
     <footer className="bg-brand-ink text-slate-300">
       <div className="container-site grid gap-10 py-16 md:grid-cols-2 lg:grid-cols-4">
@@ -17,7 +19,7 @@ export function Footer() {
             Innovative ICT solutions for modern businesses. Designed, delivered and supported in Kenya.
           </p>
           <nav aria-label="Social media" className="mt-5 flex gap-3">
-            {socials.map(([Icon, label, url]) => (
+            {socials.map(({ Icon, label, url }) => (
               <a
                 key={label}
                 href={url}
@@ -79,6 +81,7 @@ export function Footer() {
           <nav aria-label="Legal" className="flex gap-5">
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
+            <Link href="/accessibility">Accessibility</Link>
           </nav>
         </div>
       </div>

@@ -7,13 +7,28 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 
 export default function AdminPage() {
   const [token, setToken] = useState("");
+  const [role, setRole] = useState<"admin" | "editor">("editor");
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    setToken(sessionStorage.getItem("admin_token") ?? "");
-    setReady(true);
+    const storedToken = sessionStorage.getItem("admin_token") ?? "";
+    if (!storedToken) {
+      setReady(true);
+      return;
+    }
+    fetch(`${API_URL}/admin/me`, {
+      headers: { Accept: "application/json", Authorization: `Bearer ${storedToken}` },
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error();
+        const payload = await response.json();
+        setRole(payload.user.role);
+        setToken(storedToken);
+      })
+      .catch(() => sessionStorage.removeItem("admin_token"))
+      .finally(() => setReady(true));
   }, []);
 
   async function login(event: FormEvent<HTMLFormElement>) {
@@ -26,13 +41,16 @@ export default function AdminPage() {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
-          email: String(form.get("email") ?? "").trim().toLowerCase(),
+          email: String(form.get("email") ?? "")
+            .trim()
+            .toLowerCase(),
           password: String(form.get("password") ?? ""),
         }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.message ?? "Unable to sign in.");
       sessionStorage.setItem("admin_token", payload.token);
+      setRole(payload.user.role);
       setToken(payload.token);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Unable to sign in.");
@@ -47,7 +65,7 @@ export default function AdminPage() {
   }
 
   if (!ready) return <div className="min-h-screen bg-slate-100 dark:bg-slate-950" />;
-  if (token) return <AdminConsole token={token} onLogout={logout} />;
+  if (token) return <AdminConsole token={token} role={role} onLogout={logout} />;
 
   return (
     <section
@@ -65,7 +83,10 @@ export default function AdminPage() {
         >
           S
         </span>
-        <h1 id="admin-login-title" className="mt-6 font-display text-2xl font-bold text-slate-950 dark:text-white">
+        <h1
+          id="admin-login-title"
+          className="mt-6 font-display text-2xl font-bold text-slate-950 dark:text-white"
+        >
           Admin sign in
         </h1>
         <p className="mt-2 text-sm">Manage website content, customers, media and live support.</p>
@@ -92,7 +113,11 @@ export default function AdminPage() {
           />
         </label>
         {error && (
-          <p id="admin-login-error" role="alert" className="mt-4 text-sm font-medium text-red-700 dark:text-red-300">
+          <p
+            id="admin-login-error"
+            role="alert"
+            className="mt-4 text-sm font-medium text-red-700 dark:text-red-300"
+          >
             {error}
           </p>
         )}

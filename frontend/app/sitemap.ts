@@ -2,7 +2,18 @@ import type { MetadataRoute } from "next";
 import { posts } from "@/lib/data";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const pages = ["", "about", "services", "products", "portfolio", "blog", "careers", "contact", "quote"];
+  const pages = [
+    "",
+    "about",
+    "services",
+    "products",
+    "portfolio",
+    "blog",
+    "careers",
+    "contact",
+    "quote",
+    "accessibility",
+  ];
   const staticPages: MetadataRoute.Sitemap = pages.map((p) => ({
     url: `https://sysnettechs.co.ke/${p}`,
     lastModified: new Date(),

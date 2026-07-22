@@ -3,17 +3,19 @@ import { Clock, Facebook, Instagram, Linkedin, Mail, MapPin, Phone } from "lucid
 import { PageHero } from "@/components/page-hero";
 import { LeadForm } from "@/components/forms";
 import { company } from "@/lib/data";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
     "Contact Sysnettech Solutions in Nairobi for POS, CCTV, web development, biometric and networking solutions.",
 };
-export default function Contact() {
+export default async function Contact() {
+  const settings = await getPublicSiteSettings();
   const socials = [
-    [Facebook, "Facebook", "https://www.facebook.com/"],
-    [Instagram, "Instagram", "https://www.instagram.com/"],
-    [Linkedin, "LinkedIn", "https://www.linkedin.com/"],
-  ] as const;
+    { Icon: Facebook, label: "Facebook", url: settings.facebook_url },
+    { Icon: Instagram, label: "Instagram", url: settings.instagram_url },
+    { Icon: Linkedin, label: "LinkedIn", url: settings.linkedin_url },
+  ].filter(({ url }) => Boolean(url));
   return (
     <>
       <PageHero
@@ -55,7 +57,7 @@ export default function Contact() {
               })}
             </address>
             <nav aria-label="Social media" className="mt-8 flex gap-3">
-              {socials.map(([I, label, url]) => (
+              {socials.map(({ Icon, label, url }) => (
                 <a
                   href={url}
                   target="_blank"
@@ -64,7 +66,7 @@ export default function Contact() {
                   aria-label={`Sysnettech on ${label}`}
                   className="grid h-10 w-10 place-items-center rounded-full border hover:border-brand-teal-aa hover:text-brand-teal-aa dark:hover:text-teal-300"
                 >
-                  <I aria-hidden="true" size={17} />
+                  <Icon aria-hidden="true" size={17} />
                 </a>
               ))}
             </nav>

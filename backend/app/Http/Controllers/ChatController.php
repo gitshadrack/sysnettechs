@@ -98,6 +98,7 @@ class ChatController extends Controller
                 'body' => trim($data['message']),
             ]);
             $conversation->update(['last_message_at' => now(), 'status' => 'open']);
+
             return $message;
         });
 

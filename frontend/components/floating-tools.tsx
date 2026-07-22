@@ -67,7 +67,8 @@ export function FloatingTools() {
     setMessages((current) => {
       const known = new Set(current.map(({ id }) => id));
       const fresh = incoming.filter(({ id }) => !known.has(id));
-      if (!openRef.current) setUnread((count) => count + fresh.filter((item) => item.sender_type === "operator").length);
+      if (!openRef.current)
+        setUnread((count) => count + fresh.filter((item) => item.sender_type === "operator").length);
       const merged = [...current, ...fresh].sort((a, b) => a.id - b.id);
       lastMessageId.current = merged.at(-1)?.id ?? lastMessageId.current;
       return merged;
@@ -107,9 +108,12 @@ export function FloatingTools() {
 
   useEffect(() => {
     if (!session) return;
-    const interval = window.setInterval(() => {
-      loadConversation(session, true).catch(() => undefined);
-    }, open ? 4000 : 10000);
+    const interval = window.setInterval(
+      () => {
+        loadConversation(session, true).catch(() => undefined);
+      },
+      open ? 4000 : 10000,
+    );
     return () => window.clearInterval(interval);
   }, [loadConversation, open, session]);
 
@@ -195,7 +199,8 @@ export function FloatingTools() {
         {open ? <X aria-hidden="true" size={20} /> : <Headphones aria-hidden="true" size={20} />}
         {unread > 0 && (
           <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-red-700 px-1 text-xs font-bold">
-            <span className="sr-only">Unread messages: </span>{unread}
+            <span className="sr-only">Unread messages: </span>
+            {unread}
           </span>
         )}
       </button>
@@ -209,9 +214,13 @@ export function FloatingTools() {
           className="fixed bottom-24 right-5 z-40 flex max-h-[min(620px,calc(100vh-8rem))] w-[calc(100%-2.5rem)] max-w-sm flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
         >
           <header className="bg-brand-navy p-5 text-white">
-            <h2 id="support-title" className="font-bold">Sysnettech Support</h2>
+            <h2 id="support-title" className="font-bold">
+              Sysnettech Support
+            </h2>
             <p className="text-xs text-white/80">
-              {conversation?.status === "closed" ? "Conversation closed" : "Replies typically arrive in a few minutes"}
+              {conversation?.status === "closed"
+                ? "Conversation closed"
+                : "Replies typically arrive in a few minutes"}
             </p>
           </header>
 
@@ -241,13 +250,18 @@ export function FloatingTools() {
                     <p className="mb-1 text-xs font-bold opacity-80">{message.sender_name}</p>
                     <p className="whitespace-pre-wrap break-words">{message.body}</p>
                     <time className="mt-1 block text-[10px] opacity-70" dateTime={message.created_at}>
-                      {new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      {new Date(message.created_at).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </time>
                   </article>
                 ))}
               </div>
               <form onSubmit={sendMessage} className="border-t border-slate-200 p-4 dark:border-slate-700">
-                <label htmlFor="support-message" className="sr-only">Chat message</label>
+                <label htmlFor="support-message" className="sr-only">
+                  Chat message
+                </label>
                 <div className="flex gap-2">
                   <input
                     id="support-message"
@@ -255,7 +269,9 @@ export function FloatingTools() {
                     maxLength={2000}
                     disabled={sending || conversation.status === "closed"}
                     className="min-w-0 flex-1 rounded-full border border-slate-300 px-4 py-2 text-sm focus:border-brand-teal-aa focus:outline-none focus:ring-2 focus:ring-brand-teal-aa/30 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-950"
-                    placeholder={conversation.status === "closed" ? "This chat is closed" : "Type a message..."}
+                    placeholder={
+                      conversation.status === "closed" ? "This chat is closed" : "Type a message..."
+                    }
                   />
                   <button
                     type="submit"
@@ -263,11 +279,19 @@ export function FloatingTools() {
                     className="grid h-10 w-10 place-items-center rounded-full bg-brand-teal-aa text-white disabled:opacity-60"
                     aria-label="Send chat message"
                   >
-                    {sending ? <Loader2 aria-hidden="true" className="animate-spin" size={17} /> : <Send aria-hidden="true" size={17} />}
+                    {sending ? (
+                      <Loader2 aria-hidden="true" className="animate-spin" size={17} />
+                    ) : (
+                      <Send aria-hidden="true" size={17} />
+                    )}
                   </button>
                 </div>
                 {conversation.status === "closed" && (
-                  <button type="button" onClick={clearSession} className="mt-3 text-sm font-bold text-brand-navy underline dark:text-teal-300">
+                  <button
+                    type="button"
+                    onClick={clearSession}
+                    className="mt-3 text-sm font-bold text-brand-navy underline dark:text-teal-300"
+                  >
                     Start a new conversation
                   </button>
                 )}
@@ -275,26 +299,62 @@ export function FloatingTools() {
             </>
           ) : (
             <form onSubmit={startConversation} className="grid gap-4 p-5">
-              <p className="text-sm leading-6">Tell us who you are and how we can help. Your chat is kept for this browser session.</p>
+              <p className="text-sm leading-6">
+                Tell us who you are and how we can help. Your chat is kept for this browser session.
+              </p>
               <label htmlFor="chat-name" className="text-sm font-bold">
                 Name
-                <input id="chat-name" name="name" autoComplete="name" required maxLength={120} className="mt-2 w-full rounded-xl border border-slate-300 bg-transparent px-4 py-2.5 font-normal focus:border-brand-teal-aa focus:outline-none focus:ring-2 focus:ring-brand-teal-aa/30 dark:border-slate-600" />
+                <input
+                  id="chat-name"
+                  name="name"
+                  autoComplete="name"
+                  required
+                  maxLength={120}
+                  className="mt-2 w-full rounded-xl border border-slate-300 bg-transparent px-4 py-2.5 font-normal focus:border-brand-teal-aa focus:outline-none focus:ring-2 focus:ring-brand-teal-aa/30 dark:border-slate-600"
+                />
               </label>
               <label htmlFor="chat-email" className="text-sm font-bold">
                 Email <span className="font-normal text-slate-500 dark:text-slate-300">(optional)</span>
-                <input id="chat-email" name="email" type="email" autoComplete="email" maxLength={160} className="mt-2 w-full rounded-xl border border-slate-300 bg-transparent px-4 py-2.5 font-normal focus:border-brand-teal-aa focus:outline-none focus:ring-2 focus:ring-brand-teal-aa/30 dark:border-slate-600" />
+                <input
+                  id="chat-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  maxLength={160}
+                  className="mt-2 w-full rounded-xl border border-slate-300 bg-transparent px-4 py-2.5 font-normal focus:border-brand-teal-aa focus:outline-none focus:ring-2 focus:ring-brand-teal-aa/30 dark:border-slate-600"
+                />
               </label>
               <label htmlFor="chat-first-message" className="text-sm font-bold">
                 How can we help?
-                <textarea id="chat-first-message" name="message" required maxLength={2000} rows={3} className="mt-2 w-full resize-none rounded-xl border border-slate-300 bg-transparent px-4 py-2.5 font-normal focus:border-brand-teal-aa focus:outline-none focus:ring-2 focus:ring-brand-teal-aa/30 dark:border-slate-600" />
+                <textarea
+                  id="chat-first-message"
+                  name="message"
+                  required
+                  maxLength={2000}
+                  rows={3}
+                  className="mt-2 w-full resize-none rounded-xl border border-slate-300 bg-transparent px-4 py-2.5 font-normal focus:border-brand-teal-aa focus:outline-none focus:ring-2 focus:ring-brand-teal-aa/30 dark:border-slate-600"
+                />
               </label>
               <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-60">
-                {loading ? <><Loader2 aria-hidden="true" className="animate-spin" size={17} /> Connecting…</> : "Start live chat"}
+                {loading ? (
+                  <>
+                    <Loader2 aria-hidden="true" className="animate-spin" size={17} /> Connecting…
+                  </>
+                ) : (
+                  "Start live chat"
+                )}
               </button>
             </form>
           )}
 
-          {error && <p role="alert" className="border-t border-red-200 bg-red-50 px-5 py-3 text-sm font-medium text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200">{error}</p>}
+          {error && (
+            <p
+              role="alert"
+              className="border-t border-red-200 bg-red-50 px-5 py-3 text-sm font-medium text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200"
+            >
+              {error}
+            </p>
+          )}
         </section>
       )}
     </aside>
