@@ -49,7 +49,6 @@ const icons: Record<string, typeof Camera> = {
 };
 function productImageUrl(image: string) {
   if (/^https?:\/\//i.test(image)) return image;
-  if (image.startsWith("/images/products/")) return image;
   const apiOrigin = API_URL.replace(/\/api\/?$/, "");
   return `${apiOrigin}/${image.replace(/^\//, "")}`;
 }

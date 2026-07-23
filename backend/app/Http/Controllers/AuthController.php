@@ -22,7 +22,14 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid credentials.'], 422);
         }
 
-        return response()->json(['user' => $user, 'token' => $user->createToken($data['device_name'] ?? 'admin-dashboard')->plainTextToken]);
+        $expiresAt = now()->addMinutes(config('auth.admin_token_lifetime'));
+        $token = $user->createToken($data['device_name'] ?? 'admin-dashboard', ['*'], $expiresAt);
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token->plainTextToken,
+            'expires_at' => $expiresAt->toIso8601String(),
+        ]);
     }
 
     public function logout(Request $request): JsonResponse

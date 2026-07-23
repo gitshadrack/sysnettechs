@@ -7,7 +7,33 @@ export const metadata: Metadata = {
   description:
     "Explore jobs and internships at Sysnettech Solutions Ltd and help build better business technology in Kenya.",
 };
-export default function Careers() {
+
+type Career = {
+  id: number;
+  title: string;
+  excerpt?: string;
+  body?: string;
+  data?: {
+    employment_type?: string;
+    location?: string;
+  };
+};
+
+async function getCareers(): Promise<Career[]> {
+  const apiUrl =
+    process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
+  try {
+    const response = await fetch(`${apiUrl}/content/careers`, { next: { revalidate: 60 } });
+    if (!response.ok) return [];
+    const payload = await response.json();
+    return payload.data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export default async function Careers() {
+  const careers = await getCareers();
   return (
     <>
       <PageHero
@@ -49,30 +75,45 @@ export default function Careers() {
             <p className="eyebrow">Open roles</p>
             <h2 className="heading">Current opportunities</h2>
             <div className="mt-10 space-y-4">
-              {[
-                ["ICT Support Engineer", "Full-time", "Nairobi"],
-                ["Business Development Executive", "Full-time", "Nairobi"],
-                ["Software Developer Intern", "Internship", "Hybrid"],
-              ].map(([r, t, l]) => (
+              {careers.map((career) => (
                 <div
-                  key={r}
+                  key={career.id}
                   className="flex flex-col gap-4 rounded-2xl border border-slate-200 p-6 sm:flex-row sm:items-center dark:border-slate-800"
                 >
                   <div className="flex-1">
-                    <h3 className="font-display text-lg font-bold text-slate-950 dark:text-white">{r}</h3>
+                    <h3 className="font-display text-lg font-bold text-slate-950 dark:text-white">
+                      {career.title}
+                    </h3>
                     <p className="mt-2 flex gap-4 text-sm">
-                      <span>{t}</span>
+                      <span>{career.data?.employment_type ?? "Opportunity"}</span>
                       <span className="flex gap-1">
                         <MapPin size={15} />
-                        {l}
+                        {career.data?.location ?? "Kenya"}
                       </span>
                     </p>
+                    {career.excerpt && <p className="mt-4 max-w-3xl leading-7">{career.excerpt}</p>}
+                    {career.body && career.body !== career.excerpt && (
+                      <details className="mt-4 text-sm">
+                        <summary className="cursor-pointer font-bold text-brand-navy dark:text-teal-300">
+                          View role details
+                        </summary>
+                        <p className="mt-3 whitespace-pre-line leading-7">{career.body}</p>
+                      </details>
+                    )}
                   </div>
                   <a href="#apply" className="btn-primary">
                     Apply now
                   </a>
                 </div>
               ))}
+              {!careers.length && (
+                <div className="rounded-2xl border border-slate-200 p-8 text-center dark:border-slate-800">
+                  <h3 className="font-display text-xl font-bold text-slate-950 dark:text-white">
+                    No current openings
+                  </h3>
+                  <p className="mt-2">Please check back soon or send us your CV for future opportunities.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
