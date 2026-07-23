@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Content;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ContentController extends Controller
@@ -18,7 +19,7 @@ class ContentController extends Controller
                 ->where('status', 'published')
                 ->orderBy('sort_order')
                 ->latest('published_at')
-                ->paginate(20)
+                ->paginate($type === 'services' ? 100 : 20)
         );
     }
 
@@ -62,6 +63,19 @@ class ContentController extends Controller
         $content->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function download(Content $content)
+    {
+        abort_unless($content->type === 'projects' && $content->status === 'published', 404);
+
+        $path = $content->data['download_path'] ?? null;
+        abort_unless(is_string($path) && str_starts_with($path, 'portfolio/'), 404);
+        abort_unless(Storage::disk('public')->exists($path), 404);
+
+        $name = $content->data['download_name'] ?? basename($path);
+
+        return Storage::disk('public')->download($path, $name);
     }
 
     private function validated(Request $request, bool $partial = false): array

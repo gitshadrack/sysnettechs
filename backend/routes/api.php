@@ -13,6 +13,7 @@ use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/content/{type}', [ContentController::class, 'index'])->whereIn('type', ['services', 'projects', 'products', 'posts', 'testimonials', 'team', 'careers', 'faqs', 'settings']);
+Route::get('/portfolio-downloads/{content}', [ContentController::class, 'download'])->whereNumber('content');
 Route::post('/contact', [EnquiryController::class, 'store'])->middleware('throttle:5,1');
 Route::post('/quotes', [EnquiryController::class, 'store'])->middleware('throttle:5,1');
 Route::post('/service-requests', [EnquiryController::class, 'store'])->middleware('throttle:5,1');
@@ -42,6 +43,7 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::get('/content', [ContentController::class, 'adminIndex']);
     Route::apiResource('/content', ContentController::class)->except('index');
     Route::post('/uploads', [AdminController::class, 'upload']);
+    Route::post('/uploads/portfolio', [AdminController::class, 'uploadPortfolioDocument']);
     Route::get('/seo-settings', [SeoSettingsController::class, 'show']);
     Route::put('/seo-settings', [SeoSettingsController::class, 'update']);
     Route::get('/chats', [AdminChatController::class, 'index']);

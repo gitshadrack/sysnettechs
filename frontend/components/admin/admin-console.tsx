@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
 import {
   BarChart3,
   Database,
@@ -27,10 +27,18 @@ async function api<T>(token: string, path: string, options: RequestInit = {}): P
     headers: { Accept: "application/json", Authorization: `Bearer ${token}`, ...options.headers },
     cache: "no-store",
   });
+  if (response.status === 401 && typeof window !== "undefined") {
+    window.dispatchEvent(new Event("admin-auth-expired"));
+  }
   if (response.status === 204) return undefined as T;
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(payload.message ?? "The request could not be completed.");
   return payload as T;
+}
+
+function publicImageUrl(image: string) {
+  if (/^https?:\/\//i.test(image)) return image;
+  return `${API_URL.replace(/\/api\/?$/, "")}/${image.replace(/^\//, "")}`;
 }
 
 const tabs: { id: Tab; label: string; icon: typeof BarChart3 }[] = [
@@ -388,13 +396,27 @@ type ContentItem = {
   type: string;
   title: string;
   excerpt?: string;
+  body?: string;
   status: string;
+  sort_order?: number;
   meta_title?: string;
   meta_description?: string;
+  data?: {
+    employment_type?: string;
+    location?: string;
+    category?: string;
+    capabilities?: string[];
+    featured?: boolean;
+    client?: string;
+    download_path?: string;
+    download_name?: string;
+  };
 };
 function ContentModule({ token }: { token: string }) {
   const [items, setItems] = useState<ContentItem[]>([]);
   const [editing, setEditing] = useState<ContentItem | null>(null);
+  const [contentType, setContentType] = useState("careers");
+  const [contentFilter, setContentFilter] = useState<"all" | "careers" | "services" | "projects">("careers");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const load = useCallback(
@@ -407,7 +429,63 @@ function ContentModule({ token }: { token: string }) {
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
-    const data = Object.fromEntries(new FormData(form));
+    const formData = new FormData(form);
+    const type = String(formData.get("type") ?? "posts");
+    const data: Record<string, unknown> = {
+      type,
+      title: formData.get("title"),
+      excerpt: formData.get("excerpt"),
+      body: formData.get("body"),
+      meta_title: formData.get("meta_title"),
+      meta_description: formData.get("meta_description"),
+      status: formData.get("status"),
+      sort_order: Number(formData.get("sort_order") ?? 0),
+    };
+    if (type === "careers") {
+      data.data = {
+        employment_type: formData.get("career_employment_type"),
+        location: formData.get("career_location"),
+      };
+    } else if (type === "services") {
+      data.data = {
+        category: formData.get("service_category"),
+        capabilities: String(formData.get("service_capabilities") ?? "")
+          .split("\n")
+          .map((capability) => capability.trim())
+          .filter(Boolean),
+        featured: formData.get("service_featured") === "on",
+      };
+    } else if (type === "projects") {
+      let downloadPath = editing?.data?.download_path;
+      let downloadName = editing?.data?.download_name;
+      const file = formData.get("project_file");
+
+      if (file instanceof File && file.size > 0) {
+        try {
+          const uploadData = new FormData();
+          uploadData.set("file", file);
+          const upload = await api<{ path: string; name: string }>(token, "/admin/uploads/portfolio", {
+            method: "POST",
+            body: uploadData,
+          });
+          downloadPath = upload.path;
+          downloadName = upload.name;
+        } catch (reason) {
+          setError((reason as Error).message);
+          return;
+        }
+      }
+      if (formData.get("remove_project_file") === "on") {
+        downloadPath = undefined;
+        downloadName = undefined;
+      }
+      data.data = {
+        client: formData.get("project_client"),
+        category: formData.get("project_category"),
+        download_path: downloadPath,
+        download_name: downloadName,
+      };
+    }
     try {
       await api(token, editing ? `/admin/content/${editing.id}` : "/admin/content", {
         method: editing ? "PATCH" : "POST",
@@ -416,6 +494,7 @@ function ContentModule({ token }: { token: string }) {
       });
       setNotice(editing ? "Content updated." : "Content created.");
       setEditing(null);
+      setContentType(contentFilter === "all" ? "posts" : contentFilter);
       form.reset();
       await load();
     } catch (reason) {
@@ -432,6 +511,8 @@ function ContentModule({ token }: { token: string }) {
       setError((reason as Error).message);
     }
   }
+  const filteredContentItems =
+    contentFilter === "all" ? items : items.filter((item) => item.type === contentFilter);
   return (
     <section aria-labelledby="content-title">
       <ModuleHeader
@@ -440,6 +521,34 @@ function ContentModule({ token }: { token: string }) {
       />
       <Notice message={notice} />
       <Notice message={error} error />
+      <nav aria-label="Content sections" className="mb-6 flex flex-wrap gap-2">
+        {[
+          ["careers", "Careers"],
+          ["services", "Services"],
+          ["projects", "Portfolio"],
+          ["all", "All content"],
+        ].map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={contentFilter === value}
+            onClick={() => {
+              setContentFilter(value as "all" | "careers" | "services" | "projects");
+              if (value !== "all") {
+                setEditing(null);
+                setContentType(value);
+              }
+            }}
+            className={`rounded-full px-4 py-2 text-sm font-bold transition ${
+              contentFilter === value
+                ? "bg-brand-navy text-white"
+                : "border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
       <div className="grid gap-7 xl:grid-cols-[.75fr_1.25fr]">
         <form key={editing?.id ?? "new"} onSubmit={save} className="card grid gap-4">
           <h3 className="font-bold text-slate-950 dark:text-white">
@@ -447,7 +556,12 @@ function ContentModule({ token }: { token: string }) {
           </h3>
           <label className="admin-label">
             Type
-            <select name="type" defaultValue={editing?.type ?? "posts"} className="admin-input mt-2">
+            <select
+              name="type"
+              value={contentType}
+              onChange={(event) => setContentType(event.target.value)}
+              className="admin-input mt-2"
+            >
               <option value="services">Service</option>
               <option value="projects">Project</option>
               <option value="products">Product</option>
@@ -474,6 +588,132 @@ function ContentModule({ token }: { token: string }) {
               defaultValue={editing?.excerpt}
               maxLength={1000}
               rows={4}
+              className="admin-input mt-2"
+            />
+          </label>
+          <label className="admin-label">
+            {contentType === "careers" ? "Role description and requirements" : "Full content"}
+            <textarea name="body" defaultValue={editing?.body} rows={8} className="admin-input mt-2" />
+          </label>
+          {contentType === "careers" && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="admin-label">
+                Employment type
+                <input
+                  name="career_employment_type"
+                  defaultValue={editing?.data?.employment_type ?? "Full-time"}
+                  placeholder="Full-time, contract or internship"
+                  maxLength={100}
+                  className="admin-input mt-2"
+                  required
+                />
+              </label>
+              <label className="admin-label">
+                Location
+                <input
+                  name="career_location"
+                  defaultValue={editing?.data?.location ?? "Nairobi"}
+                  placeholder="Nairobi, hybrid or remote"
+                  maxLength={120}
+                  className="admin-input mt-2"
+                  required
+                />
+              </label>
+            </div>
+          )}
+          {contentType === "services" && (
+            <div className="grid gap-4">
+              <label className="admin-label">
+                Service category
+                <input
+                  name="service_category"
+                  defaultValue={editing?.data?.category}
+                  list="service-category-options"
+                  placeholder="Select or enter a category"
+                  maxLength={100}
+                  className="admin-input mt-2"
+                />
+                <datalist id="service-category-options">
+                  <option value="business-systems" />
+                  <option value="security-infrastructure" />
+                  <option value="tracking-automation" />
+                  <option value="cloud-presence" />
+                  <option value="advisory-managed" />
+                </datalist>
+              </label>
+              <label className="admin-label">
+                Capabilities <span className="font-normal">(one per line)</span>
+                <textarea
+                  name="service_capabilities"
+                  defaultValue={editing?.data?.capabilities?.join("\n")}
+                  rows={7}
+                  className="admin-input mt-2"
+                  placeholder={"Installation\nConfiguration\nTraining\nOngoing support"}
+                />
+              </label>
+              <label className="flex items-center gap-2 text-sm font-bold">
+                <input
+                  name="service_featured"
+                  type="checkbox"
+                  defaultChecked={editing?.data?.featured ?? false}
+                />
+                Feature this service
+              </label>
+            </div>
+          )}
+          {contentType === "projects" && (
+            <div className="grid gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="admin-label">
+                  Client or organisation
+                  <input
+                    name="project_client"
+                    defaultValue={editing?.data?.client}
+                    placeholder="Client name"
+                    maxLength={150}
+                    className="admin-input mt-2"
+                  />
+                </label>
+                <label className="admin-label">
+                  Portfolio category
+                  <input
+                    name="project_category"
+                    defaultValue={editing?.data?.category}
+                    placeholder="POS Systems, CCTV, Networking..."
+                    maxLength={100}
+                    className="admin-input mt-2"
+                  />
+                </label>
+              </div>
+              <label className="admin-label">
+                Downloadable portfolio file
+                <input
+                  name="project_file"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip"
+                  className="admin-input mt-2"
+                />
+                <span className="mt-2 block text-xs font-normal">
+                  PDF, Word, PowerPoint, Excel or ZIP; maximum 20 MB.
+                </span>
+              </label>
+              {editing?.data?.download_name && (
+                <div className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">
+                  Current download: <b>{editing.data.download_name}</b>
+                  <label className="mt-2 flex items-center gap-2">
+                    <input name="remove_project_file" type="checkbox" /> Remove this file
+                  </label>
+                </div>
+              )}
+            </div>
+          )}
+          <label className="admin-label">
+            Display order
+            <input
+              name="sort_order"
+              type="number"
+              min="0"
+              defaultValue={editing?.sort_order ?? 0}
               className="admin-input mt-2"
             />
           </label>
@@ -511,7 +751,10 @@ function ContentModule({ token }: { token: string }) {
             {editing && (
               <button
                 type="button"
-                onClick={() => setEditing(null)}
+                onClick={() => {
+                  setEditing(null);
+                  setContentType(contentFilter === "all" ? "posts" : contentFilter);
+                }}
                 className="rounded-full border px-5 py-3 text-sm font-bold"
               >
                 Cancel
@@ -532,7 +775,7 @@ function ContentModule({ token }: { token: string }) {
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
+              {filteredContentItems.map((item) => (
                 <tr key={item.id} className="border-b last:border-0 dark:border-slate-800">
                   <td className="py-4 font-bold">{item.title}</td>
                   <td className="capitalize">{item.type}</td>
@@ -541,7 +784,10 @@ function ContentModule({ token }: { token: string }) {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={() => setEditing(item)}
+                        onClick={() => {
+                          setEditing(item);
+                          setContentType(item.type);
+                        }}
                         className="font-bold text-brand-navy dark:text-teal-300"
                       >
                         Edit
@@ -559,6 +805,9 @@ function ContentModule({ token }: { token: string }) {
               ))}
             </tbody>
           </table>
+          {!filteredContentItems.length && (
+            <p className="py-8 text-center text-sm">No content exists in this section yet.</p>
+          )}
         </article>
       </div>
     </section>
@@ -876,6 +1125,9 @@ function BackupsModule({ token }: { token: string }) {
       const response = await fetch(`${API_URL}/admin/backups/${encodeURIComponent(file)}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (response.status === 401) {
+        window.dispatchEvent(new Event("admin-auth-expired"));
+      }
       if (!response.ok) throw new Error("Backup download failed.");
       const url = URL.createObjectURL(await response.blob());
       const anchor = document.createElement("a");
@@ -966,12 +1218,26 @@ type StoreProduct = {
   is_active: boolean;
 };
 
+const productCategories = [
+  "Cameras",
+  "Switches",
+  "Routers",
+  "Hard drives",
+  "POS hardware",
+  "Fingerprint scanners",
+  "Barcode scanners",
+  "Network accessories",
+];
+
 function OrdersModule({ token }: { token: string }) {
   const [orders, setOrders] = useState<StoreOrder[]>([]);
   const [products, setProducts] = useState<StoreProduct[]>([]);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [creating, setCreating] = useState(false);
+  const [newProductImagePreview, setNewProductImagePreview] = useState("");
+  const [productSearchInput, setProductSearchInput] = useState("");
+  const [productSearch, setProductSearch] = useState("");
   const load = useCallback(async () => {
     const [orderResult, productResult] = await Promise.all([
       api<{ data: StoreOrder[] }>(token, "/admin/orders"),
@@ -983,6 +1249,14 @@ function OrdersModule({ token }: { token: string }) {
   useEffect(() => {
     load().catch((reason) => setError(reason.message));
   }, [load]);
+  const normalizedProductSearch = productSearch.trim().toLowerCase();
+  const filteredProducts = normalizedProductSearch
+    ? products.filter((product) =>
+        [product.name, product.sku, product.category, product.description].some((value) =>
+          value.toLowerCase().includes(normalizedProductSearch),
+        ),
+      )
+    : products;
   async function update(order: StoreOrder, field: "payment_status" | "fulfilment_status", value: string) {
     setError("");
     setNotice("");
@@ -1004,12 +1278,28 @@ function OrdersModule({ token }: { token: string }) {
     setError("");
     setNotice("");
     try {
+      let image = product.image;
+      const imageFile = form.get("image");
+      if (imageFile instanceof File && imageFile.size > 0) {
+        const uploadData = new FormData();
+        uploadData.set("image", imageFile);
+        const upload = await api<{ url: string }>(token, "/admin/uploads", {
+          method: "POST",
+          body: uploadData,
+        });
+        image = upload.url;
+      }
       await api(token, `/admin/products/${product.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          sku: String(form.get("sku") ?? "").trim() || undefined,
+          name: form.get("name"),
+          category: form.get("category"),
+          description: form.get("description"),
           price: Number(form.get("price")),
           stock_quantity: Number(form.get("stock_quantity")),
+          image,
           is_active: form.get("is_active") === "on",
         }),
       });
@@ -1042,7 +1332,7 @@ function OrdersModule({ token }: { token: string }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sku: form.get("sku"),
+          sku: String(form.get("sku") ?? "").trim() || undefined,
           name: form.get("name"),
           category: form.get("category"),
           description: form.get("description"),
@@ -1053,6 +1343,7 @@ function OrdersModule({ token }: { token: string }) {
         }),
       });
       formElement.reset();
+      setNewProductImagePreview("");
       setNotice("Product added to the catalogue.");
       await load();
     } catch (reason) {
@@ -1060,6 +1351,16 @@ function OrdersModule({ token }: { token: string }) {
     } finally {
       setCreating(false);
     }
+  }
+  function previewProductImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) {
+      setNewProductImagePreview("");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setNewProductImagePreview(typeof reader.result === "string" ? reader.result : "");
+    reader.readAsDataURL(file);
   }
   async function removeProduct(product: StoreProduct) {
     if (!confirm(`Remove ${product.name} from the catalogue?`)) return;
@@ -1099,36 +1400,31 @@ function OrdersModule({ token }: { token: string }) {
           <input id="new-product-name" name="name" className="admin-input mt-2" required maxLength={160} />
         </label>
         <label className="admin-label" htmlFor="new-product-sku">
-          SKU
-          <input id="new-product-sku" name="sku" className="admin-input mt-2" required maxLength={60} />
+          SKU <span className="font-normal">(optional)</span>
+          <input
+            id="new-product-sku"
+            name="sku"
+            className="admin-input mt-2"
+            maxLength={60}
+            placeholder="Generated automatically when blank"
+          />
         </label>
         <label className="admin-label" htmlFor="new-product-category">
           Category
-          <select
+          <input
             id="new-product-category"
             name="category"
+            list="product-category-options"
             className="admin-input mt-2"
             required
-            defaultValue=""
-          >
-            <option value="" disabled>
-              Select a category
-            </option>
-            {[
-              "Cameras",
-              "Switches",
-              "Routers",
-              "Hard drives",
-              "POS hardware",
-              "Fingerprint scanners",
-              "Barcode scanners",
-              "Network accessories",
-            ].map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
+            maxLength={100}
+            placeholder="Select or enter a new category"
+          />
+          <datalist id="product-category-options">
+            {productCategories.map((category) => (
+              <option key={category} value={category} />
             ))}
-          </select>
+          </datalist>
         </label>
         <label className="admin-label" htmlFor="new-product-image">
           Product image
@@ -1137,8 +1433,20 @@ function OrdersModule({ token }: { token: string }) {
             name="image"
             type="file"
             accept="image/jpeg,image/png,image/webp,image/avif"
+            onChange={previewProductImage}
             className="admin-input mt-2"
           />
+          {newProductImagePreview && (
+            <span className="mt-3 block overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700">
+              <img
+                src={newProductImagePreview}
+                alt="Selected product preview"
+                width={640}
+                height={480}
+                className="aspect-[4/3] w-full object-cover"
+              />
+            </span>
+          )}
         </label>
         <label className="admin-label" htmlFor="new-product-price">
           Price (KES)
@@ -1186,20 +1494,132 @@ function OrdersModule({ token }: { token: string }) {
         </button>
       </form>
       <section aria-labelledby="inventory-title" className="mb-8">
-        <h3
-          id="inventory-title"
-          className="mb-4 font-display text-xl font-bold text-slate-950 dark:text-white"
-        >
-          Product inventory
-        </h3>
+        <div className="mb-4 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+          <div>
+            <h3
+              id="inventory-title"
+              className="font-display text-xl font-bold text-slate-950 dark:text-white"
+            >
+              Product inventory
+            </h3>
+            <p className="mt-1 text-sm">
+              Showing {filteredProducts.length} of {products.length} products
+            </p>
+          </div>
+          <form
+            className="flex w-full max-w-xl gap-2"
+            role="search"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setProductSearch(productSearchInput);
+            }}
+          >
+            <label className="sr-only" htmlFor="admin-product-search">
+              Search products
+            </label>
+            <input
+              id="admin-product-search"
+              type="search"
+              value={productSearchInput}
+              onChange={(event) => setProductSearchInput(event.target.value)}
+              placeholder="Search name, SKU, category or description"
+              className="admin-input"
+            />
+            <button type="submit" className="btn-primary shrink-0">
+              <Search aria-hidden="true" size={17} /> Search
+            </button>
+            {productSearch && (
+              <button
+                type="button"
+                className="rounded-full border px-4 text-sm font-bold"
+                onClick={() => {
+                  setProductSearch("");
+                  setProductSearchInput("");
+                }}
+              >
+                Clear
+              </button>
+            )}
+          </form>
+        </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             <form className="card" key={product.id} onSubmit={(event) => saveProduct(event, product)}>
+              <div className="mb-5 grid aspect-[4/3] place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                {product.image ? (
+                  <img
+                    src={publicImageUrl(product.image)}
+                    alt={`${product.name} product photo`}
+                    width={640}
+                    height={480}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <ImageIcon aria-hidden="true" size={48} className="text-slate-400" />
+                )}
+              </div>
               <p className="text-xs font-bold uppercase tracking-wider text-brand-teal-aa dark:text-teal-300">
                 {product.category} · {product.sku}
               </p>
               <h4 className="mt-2 font-bold text-slate-950 dark:text-white">{product.name}</h4>
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <label className="admin-label sm:col-span-2" htmlFor={`name-${product.id}`}>
+                  Product name
+                  <input
+                    id={`name-${product.id}`}
+                    name="name"
+                    defaultValue={product.name}
+                    maxLength={160}
+                    className="admin-input mt-2"
+                    required
+                  />
+                </label>
+                <label className="admin-label" htmlFor={`sku-${product.id}`}>
+                  SKU
+                  <input
+                    id={`sku-${product.id}`}
+                    name="sku"
+                    defaultValue={product.sku}
+                    maxLength={60}
+                    className="admin-input mt-2"
+                    required
+                  />
+                </label>
+                <label className="admin-label" htmlFor={`category-${product.id}`}>
+                  Category
+                  <input
+                    id={`category-${product.id}`}
+                    name="category"
+                    list="product-category-options"
+                    defaultValue={product.category}
+                    className="admin-input mt-2"
+                    maxLength={100}
+                    required
+                  />
+                </label>
+                <label className="admin-label sm:col-span-2" htmlFor={`description-${product.id}`}>
+                  Description
+                  <textarea
+                    id={`description-${product.id}`}
+                    name="description"
+                    defaultValue={product.description}
+                    maxLength={2000}
+                    rows={4}
+                    className="admin-input mt-2"
+                    required
+                  />
+                </label>
+                <label className="admin-label sm:col-span-2" htmlFor={`image-${product.id}`}>
+                  Replace product image
+                  <input
+                    id={`image-${product.id}`}
+                    name="image"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/avif"
+                    className="admin-input mt-2"
+                  />
+                </label>
                 <label className="admin-label" htmlFor={`price-${product.id}`}>
                   Price (KES)
                   <input

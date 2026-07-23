@@ -1,14 +1,27 @@
 "use client";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Download } from "lucide-react";
 import { useState } from "react";
 import { projects } from "@/lib/data";
-export function ProjectGrid({ limit }: { limit?: number }) {
+
+export type ProjectCard = {
+  title: string;
+  category: string;
+  client: string;
+  tone: string;
+  summary?: string;
+  downloadUrl?: string;
+  downloadName?: string;
+};
+
+export function ProjectGrid({ limit, items = projects }: { limit?: number; items?: ProjectCard[] }) {
   const [filter, setFilter] = useState("All");
-  const cats = ["All", ...Array.from(new Set(projects.map((p) => p.category)))];
-  const visible = (filter === "All" ? projects : projects.filter((p) => p.category === filter)).slice(
-    0,
-    limit,
-  );
+  const cats = ["All", ...Array.from(new Set(items.map((project) => project.category)))];
+  const visible = (filter === "All" ? items : items.filter((p) => p.category === filter)).slice(0, limit);
+
+  if (!items.length) {
+    return <p className="card text-center">No portfolio projects are currently published.</p>;
+  }
+
   return (
     <>
       <nav aria-label="Filter projects by category" className="mb-10 flex flex-wrap gap-2">
@@ -41,6 +54,16 @@ export function ProjectGrid({ limit }: { limit?: number }) {
               <small className="font-bold uppercase tracking-widest text-white/80">{p.category}</small>
               <h3 className="mt-2 font-display text-2xl font-bold">{p.title}</h3>
               <p className="mt-2 text-sm text-white/80">{p.client}</p>
+              {p.summary && <p className="mt-3 text-sm leading-6 text-white/85">{p.summary}</p>}
+              {p.downloadUrl && (
+                <a
+                  href={p.downloadUrl}
+                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-brand-navy transition hover:bg-slate-100"
+                  download={p.downloadName}
+                >
+                  <Download aria-hidden="true" size={16} /> Download portfolio
+                </a>
+              )}
             </div>
           </article>
         ))}

@@ -143,6 +143,10 @@ FILESYSTEM_DISK=public
 
 ADMIN_EMAIL=admin@sysnettechs.co.ke
 ADMIN_PASSWORD=use-a-strong-admin-password
+
+SANCTUM_EXPIRATION=480
+ADMIN_IDLE_TIMEOUT=30
+ADMIN_TOKEN_LIFETIME=480
 ```
 
 Also configure the SMTP, bank and Pesapal variables described elsewhere in
@@ -250,7 +254,8 @@ Otherwise, process queued mail with a second cron job:
 
 The PHP path may instead resemble `/usr/local/bin/ea-php82`; use the path
 reported by the hosting account. The scheduler releases expired stock
-reservations and creates daily backups, while the queue sends form emails.
+reservations, removes expired administrator tokens and creates daily backups,
+while the queue sends form emails.
 
 ### 4. Enable SSL and verify production
 
@@ -265,6 +270,12 @@ After changing backend environment values, run `php artisan config:cache`.
 Finally, test the public pages, `/admin`, products, forms, uploads, live chat,
 email delivery, cron jobs and payment callbacks. Keep `APP_DEBUG=false` in
 production and check `storage/logs/laravel.log` when the API returns an error.
+
+Portfolio documents uploaded in **Admin → Content → Portfolio** are stored in
+Laravel's `storage/app/public/portfolio` directory and downloaded through the
+API. The `php artisan storage:link` step above is therefore required. The admin
+accepts PDF, Word, PowerPoint, Excel and ZIP files up to 20 MB; ensure cPanel's
+`upload_max_filesize` and `post_max_size` PHP settings are both at least 20 MB.
 
 If the hosting plan does not support Node.js applications, the frontend cannot
 run there in its current form. Use a Node-compatible host or change the frontend

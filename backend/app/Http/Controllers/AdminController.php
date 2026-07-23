@@ -40,6 +40,20 @@ class AdminController extends Controller
         return response()->json(['path' => $path, 'url' => Storage::disk('public')->url($path)], 201);
     }
 
+    public function uploadPortfolioDocument(Request $r): JsonResponse
+    {
+        $r->validate([
+            'file' => ['required', 'file', 'mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,zip', 'max:20480'],
+        ]);
+        $file = $r->file('file');
+        $path = $file->store('portfolio', 'public');
+
+        return response()->json([
+            'path' => $path,
+            'name' => $file->getClientOriginalName(),
+        ], 201);
+    }
+
     public function users(): JsonResponse
     {
         return response()->json(User::paginate(25));

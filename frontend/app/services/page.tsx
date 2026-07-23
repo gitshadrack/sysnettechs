@@ -1,15 +1,100 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Layers3 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, CheckCircle2, Layers3 } from "lucide-react";
 import { PageHero } from "@/components/page-hero";
-import { serviceGroups, services } from "@/lib/data";
+import { serviceCatalog, serviceCategories } from "@/lib/data";
 import { LeadForm } from "@/components/forms";
+
+export const dynamic = "force-dynamic";
+
+type CmsService = {
+  id: number;
+  slug: string;
+  title: string;
+  excerpt?: string | null;
+  body?: string | null;
+  sort_order?: number;
+  data?: {
+    category?: string;
+    capabilities?: string[];
+    featured?: boolean;
+  } | null;
+};
+
+type DisplayService = {
+  slug: string;
+  title: string;
+  icon: LucideIcon;
+  summary: string;
+  items: string[];
+  category: string;
+};
+
+async function getCmsServices(): Promise<{ available: boolean; data: CmsService[] }> {
+  const apiUrl =
+    process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
+
+  try {
+    const response = await fetch(`${apiUrl}/content/services`, { cache: "no-store" });
+    if (!response.ok) return { available: false, data: [] };
+    const payload = await response.json();
+    return { available: true, data: payload.data ?? [] };
+  } catch {
+    return { available: false, data: [] };
+  }
+}
+
+function categoryTitle(category: string) {
+  return category.replace(/[-_]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
 export const metadata: Metadata = {
   title: "ICT Services",
   description:
     "Scalable business systems, security, infrastructure and digital services in Nairobi and across Kenya.",
 };
-export default function Services() {
+
+export default async function Services() {
+  const cms = await getCmsServices();
+  const displayedServices: DisplayService[] = cms.available
+    ? cms.data.map((service) => {
+        const fallback = serviceCatalog.find((item) => item.slug === service.slug);
+        const capabilities = service.data?.capabilities?.filter(Boolean);
+        return {
+          slug: service.slug,
+          title: service.title,
+          icon: fallback?.icon ?? BriefcaseBusiness,
+          summary:
+            service.excerpt ||
+            service.body ||
+            fallback?.summary ||
+            "Professional ICT services tailored to your organisation.",
+          items: capabilities?.length
+            ? capabilities
+            : (fallback?.items ?? ["Consultation", "Implementation", "Training", "Ongoing support"]),
+          category: service.data?.category?.trim() || fallback?.category || "advisory-managed",
+        };
+      })
+    : serviceCatalog.filter((service) => service.visible);
+
+  const categories = [
+    ...serviceCategories,
+    ...Array.from(new Set(displayedServices.map((service) => service.category)))
+      .filter((id) => !serviceCategories.some((category) => category.id === id))
+      .map((id) => ({
+        id,
+        title: categoryTitle(id),
+        summary: "Specialist technology services designed around your organisation's requirements.",
+      })),
+  ];
+  const groups = categories
+    .map((category) => ({
+      ...category,
+      services: displayedServices.filter((service) => service.category === category.id),
+    }))
+    .filter((category) => category.services.length > 0);
+
   return (
     <>
       <PageHero
@@ -23,7 +108,7 @@ export default function Services() {
             Explore by capability
           </p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {serviceGroups.map((group) => (
+            {groups.map((group) => (
               <Link
                 key={group.id}
                 href={`#${group.id}`}
@@ -50,7 +135,15 @@ export default function Services() {
       </section>
       <section className="section-block">
         <div className="container-site space-y-20">
-          {serviceGroups.map((group) => (
+          {!groups.length && (
+            <div className="card text-center">
+              <h2 className="font-display text-2xl font-bold text-slate-950 dark:text-white">
+                No services are currently published
+              </h2>
+              <p className="mt-3">Please contact our team for a tailored ICT consultation.</p>
+            </div>
+          )}
+          {groups.map((group) => (
             <section id={group.id} key={group.id} className="scroll-mt-28">
               <header className="mb-8 grid gap-4 border-b border-slate-200 pb-7 dark:border-slate-800 lg:grid-cols-[.7fr_1.3fr] lg:items-end">
                 <div>
@@ -61,7 +154,7 @@ export default function Services() {
               </header>
               <div className="space-y-8">
                 {group.services.map((s) => {
-                  const serviceNumber = services.findIndex((service) => service.slug === s.slug) + 1;
+                  const serviceNumber = displayedServices.findIndex((service) => service.slug === s.slug) + 1;
                   return (
                     <article
                       id={s.slug}
