@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
   BarChart3,
   Database,
@@ -416,9 +416,10 @@ function ContentModule({ token }: { token: string }) {
   const [items, setItems] = useState<ContentItem[]>([]);
   const [editing, setEditing] = useState<ContentItem | null>(null);
   const [contentType, setContentType] = useState("careers");
-  const [contentFilter, setContentFilter] = useState<"all" | "careers" | "services" | "projects">("careers");
+  const [contentFilter, setContentFilter] = useState("careers");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const editorRef = useRef<HTMLFormElement>(null);
   const load = useCallback(
     () => api<{ data: ContentItem[] }>(token, "/admin/content").then((payload) => setItems(payload.data)),
     [token],
@@ -485,6 +486,10 @@ function ContentModule({ token }: { token: string }) {
         download_path: downloadPath,
         download_name: downloadName,
       };
+    } else if (type === "posts") {
+      data.data = {
+        category: formData.get("blog_category"),
+      };
     }
     try {
       await api(token, editing ? `/admin/content/${editing.id}` : "/admin/content", {
@@ -513,6 +518,17 @@ function ContentModule({ token }: { token: string }) {
   }
   const filteredContentItems =
     contentFilter === "all" ? items : items.filter((item) => item.type === contentFilter);
+  const contentSections = [
+    ["careers", "Careers"],
+    ["services", "Services"],
+    ["projects", "Portfolio"],
+    ["posts", "Blog"],
+    ["testimonials", "Testimonials"],
+    ["team", "Team"],
+    ["faqs", "FAQs"],
+    ["all", "All content"],
+  ];
+  const activeSectionLabel = contentSections.find(([value]) => value === contentFilter)?.[1] ?? "Content";
   return (
     <section aria-labelledby="content-title">
       <ModuleHeader
@@ -522,18 +538,15 @@ function ContentModule({ token }: { token: string }) {
       <Notice message={notice} />
       <Notice message={error} error />
       <nav aria-label="Content sections" className="mb-6 flex flex-wrap gap-2">
-        {[
-          ["careers", "Careers"],
-          ["services", "Services"],
-          ["projects", "Portfolio"],
-          ["all", "All content"],
-        ].map(([value, label]) => (
+        {contentSections.map(([value, label]) => (
           <button
             key={value}
             type="button"
             aria-pressed={contentFilter === value}
             onClick={() => {
-              setContentFilter(value as "all" | "careers" | "services" | "projects");
+              setContentFilter(value);
+              setNotice("");
+              setError("");
               if (value !== "all") {
                 setEditing(null);
                 setContentType(value);
@@ -549,10 +562,17 @@ function ContentModule({ token }: { token: string }) {
           </button>
         ))}
       </nav>
-      <div className="grid gap-7 xl:grid-cols-[.75fr_1.25fr]">
-        <form key={editing?.id ?? "new"} onSubmit={save} className="card grid gap-4">
+      <div className="grid gap-7 xl:grid-cols-[1.25fr_.75fr]">
+        <form
+          ref={editorRef}
+          key={editing?.id ?? `new-${contentType}`}
+          onSubmit={save}
+          className="card order-2 grid scroll-mt-24 gap-4"
+        >
           <h3 className="font-bold text-slate-950 dark:text-white">
-            {editing ? "Edit content" : "New content"}
+            {editing
+              ? `Edit: ${editing.title}`
+              : `Add ${contentSections.find(([value]) => value === contentType)?.[1] ?? "content"}`}
           </h3>
           <label className="admin-label">
             Type
@@ -707,6 +727,18 @@ function ContentModule({ token }: { token: string }) {
               )}
             </div>
           )}
+          {contentType === "posts" && (
+            <label className="admin-label">
+              Blog category
+              <input
+                name="blog_category"
+                defaultValue={editing?.data?.category}
+                placeholder="Business Technology, Cybersecurity..."
+                maxLength={100}
+                className="admin-input mt-2"
+              />
+            </label>
+          )}
           <label className="admin-label">
             Display order
             <input
@@ -762,8 +794,33 @@ function ContentModule({ token }: { token: string }) {
             )}
           </div>
         </form>
-        <article className="card overflow-x-auto">
-          <h3 className="font-bold text-slate-950 dark:text-white">Content library</h3>
+        <article className="card order-1 overflow-x-auto">
+          <header className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="font-bold text-slate-950 dark:text-white">{activeSectionLabel} entries</h3>
+              <p className="mt-1 text-xs">
+                {filteredContentItems.length} {filteredContentItems.length === 1 ? "record" : "records"}
+              </p>
+            </div>
+            {contentFilter !== "all" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(null);
+                  setContentType(contentFilter);
+                  setNotice("");
+                  setError("");
+                  window.setTimeout(
+                    () => editorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+                    0,
+                  );
+                }}
+                className="btn-primary"
+              >
+                <Plus aria-hidden="true" size={16} /> Add new {activeSectionLabel.toLowerCase()}
+              </button>
+            )}
+          </header>
           <table className="mt-5 w-full min-w-[620px] text-left text-sm">
             <caption className="sr-only">Managed website content</caption>
             <thead>
@@ -787,6 +844,12 @@ function ContentModule({ token }: { token: string }) {
                         onClick={() => {
                           setEditing(item);
                           setContentType(item.type);
+                          setNotice("");
+                          setError("");
+                          window.setTimeout(
+                            () => editorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+                            0,
+                          );
                         }}
                         className="font-bold text-brand-navy dark:text-teal-300"
                       >
@@ -806,7 +869,10 @@ function ContentModule({ token }: { token: string }) {
             </tbody>
           </table>
           {!filteredContentItems.length && (
-            <p className="py-8 text-center text-sm">No content exists in this section yet.</p>
+            <p className="py-8 text-center text-sm">
+              No {contentSections.find(([value]) => value === contentFilter)?.[1]?.toLowerCase() ?? "content"}{" "}
+              exists in this section yet. Use the editor to add the first entry.
+            </p>
           )}
         </article>
       </div>

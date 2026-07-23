@@ -3,18 +3,62 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
-import { posts } from "@/lib/data";
+import { posts as fallbackPosts } from "@/lib/data";
 import { createPageMetadata, siteUrl } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return posts.map(({ slug }) => ({ slug }));
+type BlogPost = {
+  slug: string;
+  title: string;
+  category: string;
+  date: string;
+  publishedAt: string;
+  excerpt: string;
+  content: string[];
+};
+
+async function getPost(slug: string): Promise<BlogPost | null> {
+  const apiUrl =
+    process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
+  const fallback = fallbackPosts.find((entry) => entry.slug === slug);
+
+  try {
+    const response = await fetch(`${apiUrl}/content/posts`, { cache: "no-store" });
+    if (!response.ok) return fallback ?? null;
+    const payload = await response.json();
+    const post = payload.data?.find((entry: { slug: string }) => entry.slug === slug);
+    if (!post) return null;
+    const published = new Date(post.published_at ?? post.created_at ?? Date.now());
+    return {
+      slug: post.slug,
+      title: post.title,
+      category: post.data?.category || fallback?.category || "ICT Insights",
+      date: new Intl.DateTimeFormat("en-KE", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }).format(published),
+      publishedAt: published.toISOString(),
+      excerpt: post.excerpt || fallback?.excerpt || "",
+      content:
+        post.body
+          ?.split(/\n\s*\n/)
+          .map((paragraph: string) => paragraph.trim())
+          .filter(Boolean) ??
+        fallback?.content ??
+        [],
+    };
+  } catch {
+    return fallback ?? null;
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = posts.find((entry) => entry.slug === slug);
+  const post = await getPost(slug);
   return post
     ? createPageMetadata({ title: post.title, description: post.excerpt, path: `/blog/${post.slug}` })
     : {};
@@ -22,7 +66,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogArticle({ params }: Props) {
   const { slug } = await params;
-  const post = posts.find((entry) => entry.slug === slug);
+  const post = await getPost(slug);
   if (!post) notFound();
 
   const url = `${siteUrl}/blog/${post.slug}`;
