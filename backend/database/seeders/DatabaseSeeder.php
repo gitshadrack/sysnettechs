@@ -52,7 +52,9 @@ class DatabaseSeeder extends Seeder
 
         foreach (['Multi-Branch Retail POS', 'Smart Factory Surveillance', 'Hospital Operations Portal'] as $title) {
             Content::updateOrCreate(['type' => 'projects', 'slug' => Str::slug($title)], ['title' => $title, 'excerpt' => 'A scalable implementation delivered for a Kenyan organisation.', 'status' => 'published', 'published_at' => now()]);
-        }$careers = [
+        }
+
+        $careers = [
             ['ICT Support Engineer', 'Support client infrastructure, users and field deployments with responsive troubleshooting and clear documentation.', 'Full-time', 'Nairobi', 10],
             ['Business Development Executive', 'Build trusted client relationships, understand operational needs and coordinate practical ICT proposals.', 'Full-time', 'Nairobi', 20],
             ['Software Developer Intern', 'Contribute to web applications, testing and documentation while learning from production delivery work.', 'Internship', 'Hybrid', 30],
