@@ -6,5 +6,6 @@ backend/storage/app/private/
 backend/storage/app/public/
 backend/storage/logs/*.log
 backend/bootstrap/cache/*.php
+backend/database/database.sqlite
 !.gitkeep
 *.local
