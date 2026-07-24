@@ -419,11 +419,18 @@ function ContentModule({ token }: { token: string }) {
   const [contentFilter, setContentFilter] = useState("careers");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const editorRef = useRef<HTMLFormElement>(null);
-  const load = useCallback(
-    () => api<{ data: ContentItem[] }>(token, "/admin/content").then((payload) => setItems(payload.data)),
-    [token],
-  );
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const payload = await api<{ data: ContentItem[] }>(token, "/admin/content");
+      setItems(payload.data);
+      setError("");
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
   useEffect(() => {
     load().catch((reason) => setError(reason.message));
   }, [load]);
@@ -529,6 +536,8 @@ function ContentModule({ token }: { token: string }) {
     ["all", "All content"],
   ];
   const activeSectionLabel = contentSections.find(([value]) => value === contentFilter)?.[1] ?? "Content";
+  const sectionCount = (type: string) =>
+    type === "all" ? items.length : items.filter((item) => item.type === type).length;
   return (
     <section aria-labelledby="content-title">
       <ModuleHeader
@@ -558,10 +567,11 @@ function ContentModule({ token }: { token: string }) {
                 : "border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"
             }`}
           >
-            {label}
+            {label} ({sectionCount(value)})
           </button>
         ))}
       </nav>
+      {loading && <p className="mb-5 text-sm">Loading website content…</p>}
       <div className="grid gap-7 xl:grid-cols-[1.25fr_.75fr]">
         <form
           ref={editorRef}

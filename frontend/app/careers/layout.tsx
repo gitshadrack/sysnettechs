@@ -11,17 +11,7 @@ export default function CareersLayout({ children }: { children: React.ReactNode 
     <>
       {children}
       <JsonLd
-        data={pageSchema("CollectionPage", "Careers at Sysnettech Solutions", description, "/careers", {
-          mainEntity: {
-            "@type": "ItemList",
-            name: "Current opportunities",
-            itemListElement: [
-              "ICT Support Engineer",
-              "Business Development Executive",
-              "Software Developer Intern",
-            ].map((name, index) => ({ "@type": "ListItem", position: index + 1, name })),
-          },
-        })}
+        data={pageSchema("CollectionPage", "Careers at Sysnettech Solutions", description, "/careers")}
       />
     </>
   );
